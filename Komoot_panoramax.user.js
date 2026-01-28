@@ -157,7 +157,7 @@
     }
 
     try {
-      const apiUrl = `https://api.panoramax.xyz/api/search?place_position=${lon},${lat}&place_fov_tolerance=180&sortby=-ts&place_distance=0-50`;
+      const apiUrl = `https://api.panoramax.xyz/api/search?place_position=${lon},${lat}&place_fov_tolerance=180&sortby=-ts&place_distance=0-50&limit=100`;
       console.log("[Panoramax] API", apiUrl);
 
       const res = await fetch(apiUrl);
