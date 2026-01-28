@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot → Panoramax popup (Chrome)
 // @namespace    https://panoramax.xyz/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Bouton Panoramax sur Komoot avec popup type Street View
 // @match        https://www.komoot.com/*
 // @grant        none
@@ -118,6 +118,22 @@
     return btn;
   }
 
+  function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Rayon de la Terre en km
+    const toRad = angle => angle * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  }
+
   /* ---------- OBSERVER ---------- */
   const observer = new MutationObserver(async () => {
     const coordEl = document.querySelector("p.css-n69bif");
@@ -126,8 +142,8 @@
     const m = coordEl.textContent.match(/(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)/);
     if (!m) return;
 
-    const lon = m[1];
-    const lat = m[3];
+    const lat = m[1];
+    const lon = m[3];
     const key = `${lon},${lat}`;
     if (key === lastCoords) return;
 
@@ -141,7 +157,7 @@
     }
 
     try {
-      const apiUrl = `https://api.panoramax.xyz/api/search?place_position=${lat},${lon}`;
+      const apiUrl = `https://api.panoramax.xyz/api/search?place_position=${lon},${lat}&place_fov_tolerance=180&sortby=-ts&place_distance=0-50`;
       console.log("[Panoramax] API", apiUrl);
 
       const res = await fetch(apiUrl);
@@ -152,7 +168,26 @@
         return;
       }
 
-      panoUrl = `https://api.panoramax.xyz/?focus=pic&pic=${data.features[0].id}`;
+      let min_dist = 0;
+      let picture_id = 'NULL';
+      data.features.forEach(feature => {
+        const coords = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+        console.log(`Feature de type ${type} avec coordonnées :`, coords);
+
+        if (type === "Point") {
+          const slon = coords[0];
+          const slat = coords[1];
+          console.log(`Latitude : ${slat}, Longitude : ${slon}, à partir de ${lat},${lon}`);
+          let distanceBetweenPoints = distance(lat,lon,slat,slon);
+          if(distanceBetweenPoints < min_dist || min_dist == 0) {
+            min_dist = distanceBetweenPoints;
+            picture_id = feature.id;
+          }
+        }
+      });
+
+      panoUrl = `https://api.panoramax.xyz/?focus=pic&pic=${picture_id}`;
       if (btn) {
         btn.textContent = "📸";
         btn.disabled = false;
