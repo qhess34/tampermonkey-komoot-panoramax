@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot → Panoramax popup (Chrome)
 // @namespace    https://panoramax.xyz/
-// @version      1.0.2
+// @version      1.0.3
 // @description  Bouton Panoramax sur Komoot avec popup type Street View
 // @match        https://www.komoot.com/*
 // @grant        none
@@ -97,7 +97,7 @@
 
   /* ---------- BUTTON ---------- */
   function createOrGetButton() {
-    const container = document.querySelector("div.css-1dm4ddc");
+    const container = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div:nth-child(2)');
     if (!container) return null;
 
     let btn = container.querySelector(".panoramax-btn");
@@ -118,6 +118,7 @@
     return btn;
   }
 
+
   function distance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Rayon de la Terre en km
     const toRad = angle => angle * Math.PI / 180;
@@ -136,7 +137,7 @@
 
   /* ---------- OBSERVER ---------- */
   const observer = new MutationObserver(async () => {
-    const coordEl = document.querySelector("p.css-n69bif");
+    const coordEl = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div > div > p');
     if (!coordEl) return;
 
     const m = coordEl.textContent.match(/(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)/);
@@ -200,3 +201,4 @@
 
   observer.observe(document.body, { childList: true, subtree: true });
 })();
+
