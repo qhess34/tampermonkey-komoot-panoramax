@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot → Panoramax popup (Chrome)
 // @namespace    https://panoramax.xyz/
-// @version      1.0.3
+// @version      1.0.4
 // @description  Bouton Panoramax sur Komoot avec popup type Street View
 // @match        https://www.komoot.com/*
 // @grant        none
@@ -97,8 +97,11 @@
 
   /* ---------- BUTTON ---------- */
   function createOrGetButton() {
-    const container = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div:nth-child(2)');
-    if (!container) return null;
+    console.log('coucou');
+    const container = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div:nth-child(2)') || document.querySelector('.maplibregl-popup-content > div:nth-of-type(2) > div > div:nth-child(2)') ;
+    if (!container) {
+      return null;
+    }
 
     let btn = container.querySelector(".panoramax-btn");
     if (btn) return btn;
@@ -137,7 +140,7 @@
 
   /* ---------- OBSERVER ---------- */
   const observer = new MutationObserver(async () => {
-    const coordEl = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div > div > p');
+    const coordEl = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div > div > p') || document.querySelector('.maplibregl-popup-content > div:nth-of-type(2) > div > div > div > p');
     if (!coordEl) return;
 
     const m = coordEl.textContent.match(/(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)/);
@@ -174,12 +177,10 @@
       data.features.forEach(feature => {
         const coords = feature.geometry.coordinates;
         const type = feature.geometry.type;
-        console.log(`Feature de type ${type} avec coordonnées :`, coords);
 
         if (type === "Point") {
           const slon = coords[0];
           const slat = coords[1];
-          console.log(`Latitude : ${slat}, Longitude : ${slon}, à partir de ${lat},${lon}`);
           let distanceBetweenPoints = distance(lat,lon,slat,slon);
           if(distanceBetweenPoints < min_dist || min_dist == 0) {
             min_dist = distanceBetweenPoints;
