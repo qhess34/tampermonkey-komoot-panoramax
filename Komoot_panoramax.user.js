@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot → Panoramax popup (Chrome)
 // @namespace    https://panoramax.xyz/
-// @version      1.0.4
+// @version      1.0.5
 // @description  Bouton Panoramax sur Komoot avec popup type Street View
 // @match        https://www.komoot.com/*
 // @grant        none
@@ -97,8 +97,8 @@
 
   /* ---------- BUTTON ---------- */
   function createOrGetButton() {
-    console.log('coucou');
-    const container = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div:nth-child(2)') || document.querySelector('.maplibregl-popup-content > div:nth-of-type(2) > div > div:nth-child(2)') ;
+    const container = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div:nth-child(2)') || document.querySelector('.maplibregl-popup-content > div > div > div:nth-child(2)') ;
+    console.log(container);
     if (!container) {
       return null;
     }
@@ -140,7 +140,8 @@
 
   /* ---------- OBSERVER ---------- */
   const observer = new MutationObserver(async () => {
-    const coordEl = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div > div > p') || document.querySelector('.maplibregl-popup-content > div:nth-of-type(2) > div > div > div > p');
+    const coordEl = document.querySelector('[data-test-id="waypoint-popup"] > div > div > div > div > div > p') || document.querySelector('.maplibregl-popup-content > div > div > div > div > p');
+    console.log(coordEl);
     if (!coordEl) return;
 
     const m = coordEl.textContent.match(/(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)/);
@@ -202,4 +203,3 @@
 
   observer.observe(document.body, { childList: true, subtree: true });
 })();
-
